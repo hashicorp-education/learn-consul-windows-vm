@@ -18,9 +18,35 @@ Move-Item -Path C:\Consul\consul_1.12.0_windows_amd64\consul.exe -Destination C:
 setx /M PATH "$env:path;C:\Consul"
 $ENV:PATH="$ENV:PATH;C:\Consul"
 
+# Run Consul server
+$serverConfigFile = "C:\Consul\config\server.json"
+New-Item $serverConfigFile -ItemType File
+$serverConfigContent = @"
+{
+  "datacenter": "dc1",
+  "data_dir": "C:\\Consul",
+  "log_level": "INFO",
+  "node_name": "server-1",
+  "server": true,
+  "bootstrap_expect": 1,
+  "client_addr": "0.0.0.0",
+  "bootstrap": true,
+  "ui": true,
+  "connect": {
+    "enabled": true
+  },
+  "log_file" : "C:\\Consul\\consul.log" 
+}
+"@
+Add-Content $serverConfigFile $serverConfigContent
+# Start-Job -ScriptBlock{ consul agent -config-dir="C:\Consul\config" }
+Start-Process -NoNewWindow -FilePath "C:\Consul\consul" -ArgumentList "agent -config-dir=`"C:\Consul\config`""
+
 ## Install Docker for envoy
-Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/microsoft/Windows-Containers/Main/helpful_tools/Install-DockerCE/install-docker-ce.ps1" -o install-docker-ce.ps1
-.\install-docker-ce.ps1
+# Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/microsoft/Windows-Containers/Main/helpful_tools/Install-DockerCE/install-docker-ce.ps1" -o install-docker-ce.ps1
+# .\install-docker-ce.ps1
+
+## Start Envoy
 </powershell>
 EOF
 }
