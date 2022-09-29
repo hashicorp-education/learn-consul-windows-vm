@@ -42,11 +42,42 @@ Add-Content $serverConfigFile $serverConfigContent
 # Start-Job -ScriptBlock{ consul agent -config-dir="C:\Consul\config" }
 Start-Process -NoNewWindow -FilePath "C:\Consul\consul" -ArgumentList "agent -config-dir=`"C:\Consul\config`""
 
-## Install Docker for envoy
+## Install Docker for Envoy
 # Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/microsoft/Windows-Containers/Main/helpful_tools/Install-DockerCE/install-docker-ce.ps1" -o install-docker-ce.ps1
 # .\install-docker-ce.ps1
+# Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
+# Install-Package -Name docker -ProviderName DockerMsftProvider -Force
+# Restart-Computer -Force
 
 ## Start Envoy
+# docker pull envoyproxy/envoy-windows-dev:63f27a6b6de0b2172f4721c31c69a050713c4c56
+# docker run --rm envoyproxy/envoy-windows-dev:63f27a6b6de0b2172f4721c31c69a050713c4c56 --version
+
+# # Install Git
+# # https://stackoverflow.com/questions/46731433/how-to-download-and-install-git-client-for-window-using-powershell
+# $git_url = "https://api.github.com/repos/git-for-windows/git/releases/latest"
+# $asset = Invoke-RestMethod -Method Get -Uri $git_url | % assets | where name -like "*64-bit.exe"
+# # download installer
+# $installer = "$env:temp\$($asset.name)"
+# Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $installer
+# # run installer
+# $git_install_inf = "<install inf file>"
+# $install_args = "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NOCANCEL /NORESTART /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /LOADINF=""$git_install_inf"""
+# Start-Process -FilePath $installer -ArgumentList $install_args -Wait
+
+# # Clone Envoy repo
+# cd C:\
+# git clone https://github.com/envoyproxy/envoy
+
+# # Install Bazel (Bazelisk)
+# mkdir C:\bazel
+# Invoke-WebRequest https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-windows-amd64.exe -OutFile C:\bazel\bazel.exe
+# setx /M PATH "$env:path;C:\bazel"
+# $ENV:PATH="$ENV:PATH;C:\bazel"
+
+# # Build Envoy
+# cd C:\envoy
+# bazel build -c opt envoy
 </powershell>
 EOF
 }
