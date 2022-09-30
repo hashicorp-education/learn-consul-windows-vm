@@ -4,8 +4,8 @@ resource "random_string" "random" {
 }
 
 locals {
-  name = "${var.name_prefix}-${random_string.random.id}"
-  hvn_id           = "${local.name}-hvn"
+  name   = "${var.name_prefix}-${random_string.random.id}"
+  hvn_id = "${local.name}-hvn"
 }
 
 data "aws_availability_zones" "available" {
