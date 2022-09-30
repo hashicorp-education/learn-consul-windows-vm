@@ -14,7 +14,6 @@ $CONSUL_CERTS_PATH="C:\${consul_folder}\${consul_certs_folder}"
 $ENVOY_PATH="C:\${envoy_folder}"
 $HASHICUPS_PATH="C:\${hashicups_folder}"
 $FAKESERVICE_PATH="C:\Fake"
-$HASUPSTREANS = "${hasupstreams}"
 
 New-Item -type directory $CONSUL_PATH
 New-Item -type directory $CONSUL_CONFIG_PATH
@@ -93,12 +92,12 @@ $env:path =  $env:path + ";" + $FAKESERVICE_PATH
 
 # Set up fakeservice env variables
 $env:LISTEN_ADDR="0.0.0.0:9090"
-if ($HASUPSTREANS -eq "true") {
+if ($NODE_NAME -eq "fakeservice-frontend") {
   $env:UPSTREAM_URIS="http://localhost:8080"
 }
 $env:NAME=$NODE_NAME
 
-# Start fakeservice
+# Start fakeservice and envoy
 Start-Process fake-service -RedirectStandardOutput .\console.out -RedirectStandardError .\console.err
 consul.exe connect envoy -sidecar-for=${node_name} -token=${consul_token} -admin-access-log-path="C:\/envoy\/back.log" -bootstrap | Set-Content c:\envoy\envoy.json -Force
 Start-Process envoy.exe -ArgumentList '-c','c:\envoy\envoy.json' -RedirectStandardOutput c:\envoy\console.out -RedirectStandardError c:\envoy\console.err

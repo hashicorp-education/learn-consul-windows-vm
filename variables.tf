@@ -21,23 +21,8 @@ variable "consul_base_folders" {
 }
 variable "consul_url" {
   type        = string
-  description = "Consul Url "
+  description = "Consul URL"
   default     = "https://releases.hashicorp.com/consul/1.12.0/consul_1.12.0_windows_amd64.zip"
-}
-
-variable "apps" {
-  type        = list(map(string))
-  description = ".tpl file names for all instances"
-  default = [
-    {
-      name     = "frontend"
-      upstream = true
-    },
-    {
-      name     = "backend"
-      upstream = false
-    }
-  ]
 }
 
 variable "envoy_url" {
