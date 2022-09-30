@@ -1,39 +1,49 @@
-variable "region" {
+variable "hvn_region" {
   default = "us-west-2"
 }
 
-variable "name" {
-  default = "learn-consul-windows-vm"
+variable "vpc_region" {
+  default = "us-west-2"
 }
 
-variable "vpc_cidr" {
-  default = "10.0.0.0/16"
+variable "name_prefix" {
+  default = "learn-consul-windows"
 }
 
-variable "subnet_cidr" {
-  default = "10.0.1.0/24"
+variable "consul_base_folders" {
+  type        = map(string)
+  description = "Consul folders structure"
+  default = {
+    consul_folder        = "consul"
+    consul_config_folder = "config"
+    consul_certs_folder  = "certs"
+  }
+}
+variable "consul_url" {
+  type        = string
+  description = "Consul Url "
+  default     = "https://releases.hashicorp.com/consul/1.12.0/consul_1.12.0_windows_amd64.zip"
 }
 
-variable "instance_type" {
-  default = "t2.micro"
+variable "apps" {
+  type        = list(map(string))
+  description = ".tpl file names for all instances"
+  default = [
+    {
+      name     = "frontend"
+      upstream = true
+    },
+    {
+      name     = "backend"
+      upstream = false
+    }
+  ]
 }
 
-variable "associate_public_ip_address" {
-  default = "true"
+variable "envoy_url" {
+  default = "https://jona-envoy.s3.eu-west-3.amazonaws.com/windows/v1.22/envoy.exe"
 }
 
-variable "windows_root_volume_size" {
-  default = "30"
-}
-
-variable "windows_data_volume_size" {
-  default = "10"
-}
-
-variable "windows_root_volume_type" {
-  default = "gp2"
-}
-
-variable "windows_data_volume_type" {
-  default = "gp2"
+variable "fakeservice_url" {
+  default = "https://github.com/nicholasjackson/fake-service/releases/download/v0.24.2/fake_service_windows_amd64.zip"
 }

@@ -1,0 +1,27 @@
+{
+  "service": {
+    "name": "fakeservice-frontend",
+    "id": "fakeservice-frontend",
+    "port": 9090,
+    "connect": {
+      "sidecar_service": {
+        "proxy": {
+          "upstreams": [
+            {
+              "destination_name": "fakeservice-backend",
+              "local_bind_port": 8080
+            }
+          ]
+        }
+      }
+    },
+    "check": {
+      "id": "fakeservice-frontend",
+      "name": "fakeservice-frontend",
+      "service_id": "fakeservice-frontend",
+      "tcp": "localhost:9090",
+      "interval": "1s",
+      "timeout": "3s"
+    }
+  }
+}

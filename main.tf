@@ -1,95 +1,56 @@
-provider "aws" {
-  region = var.region
-}
-
 resource "random_string" "random" {
   length  = 4
   special = false
 }
 
 locals {
-  name = "${var.name}-${random_string.random.id}"
+  name = "${var.name_prefix}-${random_string.random.id}"
+  hvn_id           = "${local.name}-hvn"
 }
 
-# Create supporting infrastructure
-resource "aws_vpc" "main" {
-  cidr_block           = var.vpc_cidr
+data "aws_availability_zones" "available" {
+  filter {
+    name   = "zone-type"
+    values = ["availability-zone"]
+  }
+}
+
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "3.10.0"
+
+  azs                  = data.aws_availability_zones.available.names
+  cidr                 = "10.0.0.0/16"
   enable_dns_hostnames = true
-  tags = {
-    Name = "${local.name}-vpc"
-  }
+  name                 = "${local.name}-vpc"
+  private_subnets      = []
+  public_subnets       = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 }
 
-resource "aws_subnet" "public" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.subnet_cidr
-  availability_zone = "${var.region}a"
-  tags = {
-    Name = "${local.name}-public-subnet"
-  }
+resource "hcp_hvn" "main" {
+  hvn_id         = local.hvn_id
+  cloud_provider = "aws"
+  region         = var.hvn_region
+  cidr_block     = "172.25.32.0/20"
 }
 
-resource "aws_internet_gateway" "gw" {
-  vpc_id = aws_vpc.main.id
-  tags = {
-    Name = "${local.name}-igw"
-  }
+module "aws_hcp_consul" {
+  source  = "hashicorp/hcp-consul/aws"
+  version = "~> 0.8.8"
+
+  hvn             = hcp_hvn.main
+  vpc_id          = module.vpc.vpc_id
+  subnet_ids      = module.vpc.public_subnets
+  route_table_ids = module.vpc.public_route_table_ids
 }
 
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.gw.id
-  }
-  tags = {
-    Name = "${local.name}-public-subnet-rt"
-  }
+resource "hcp_consul_cluster" "main" {
+  cluster_id      = local.name
+  hvn_id          = hcp_hvn.main.hvn_id
+  public_endpoint = true
+  tier            = "development"
 }
 
-resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public.id
-}
-
-# Create SSH key pair
-resource "tls_private_key" "ssh" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "ssh" {
-  key_name   = "${local.name}-key-pair"
-  public_key = tls_private_key.ssh.public_key_openssh
-}
-
-resource "local_file" "ssh_key" {
-  filename = "${aws_key_pair.ssh.key_name}.pem"
-  content  = tls_private_key.ssh.private_key_pem
-}
-
-resource "aws_security_group" "allow_all_traffic" {
-  name        = "allow_all_traffic"
-  description = "Allow all traffic"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow incoming traffic"
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow outgoing traffic"
-  }
-
-  tags = {
-    Name = "allow_tls"
-  }
+resource "hcp_consul_cluster_root_token" "token" {
+  cluster_id = hcp_consul_cluster.main.id
 }
