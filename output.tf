@@ -5,9 +5,9 @@ output "password_data" {
   sensitive = true
 }
 
-output "fakeservice_public_ips" {
+output "fakeservice_addresses" {
   value = {
-    for service, resource in aws_instance.fakeservice : service => resource.public_ip
+    for service, resource in aws_instance.fakeservice : service => "http://${resource.public_ip}:9090"
   }
 }
 
