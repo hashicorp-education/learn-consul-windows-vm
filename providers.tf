@@ -22,3 +22,9 @@ provider "consul" {
   datacenter = hcp_consul_cluster.main.datacenter
   token      = hcp_consul_cluster_root_token.token.secret_id
 }
+
+# Replace client_id and client_secret from values from HCP IAM settings 
+provider "hcp" {
+  client_id     = "service-principal-key-client-id"
+  client_secret = "service-principal-key-client-secret"
+}
