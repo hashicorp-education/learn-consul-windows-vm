@@ -69,7 +69,7 @@ resource "aws_instance" "fakeservice" {
   vpc_security_group_ids = [module.aws_hcp_consul.security_group_id, aws_security_group.hcp_consul_ec2.id]
   key_name               = aws_key_pair.instance_key_pair.key_name
   get_password_data      = true
-  user_data = templatefile("${path.module}/templates/consul-client-agent.tpl",
+  user_data = templatefile("${path.module}/templates/consul-client-agent.tftpl",
     merge(var.consul_base_folders, {
       envoy_folder        = "envoy"
       hashicups_folder    = "hashicups"
