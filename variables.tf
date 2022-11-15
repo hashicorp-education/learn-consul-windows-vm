@@ -22,11 +22,11 @@ variable "consul_base_folders" {
 variable "consul_url" {
   type        = string
   description = "Consul URL"
-  default     = "https://releases.hashicorp.com/consul/1.12.0/consul_1.12.0_windows_amd64.zip"
+  default     = "https://consul-windows-preview.s3.us-west-2.amazonaws.com/consul/consul_1.15.0_windows_amd64.zip"
 }
 
 variable "envoy_url" {
-  default = "https://jona-envoy.s3.eu-west-3.amazonaws.com/windows/v1.22/envoy.exe"
+  default = "https://consul-windows-preview.s3.us-west-2.amazonaws.com/envoy/v1.23/envoy.exe"
 }
 
 variable "fakeservice_url" {
