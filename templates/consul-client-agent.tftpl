@@ -14,6 +14,7 @@ $CONSUL_CERTS_PATH="C:\${consul_folder}\${consul_certs_folder}"
 $ENVOY_PATH="C:\${envoy_folder}"
 $HASHICUPS_PATH="C:\${hashicups_folder}"
 $FAKESERVICE_PATH="C:\Fake"
+$CA_PEM_FILE_PATH="C:\${consul_folder}\${consul_config_folder}\ca.pem"
 
 New-Item -type directory $CONSUL_PATH
 New-Item -type directory $CONSUL_CONFIG_PATH
@@ -61,7 +62,7 @@ $tokenConfig = @{"agent"="${consul_token}"}
 $grpcConfig = @{"grpc"= 8502}
 $consulJsonConfig | Add-Member -Type NoteProperty -Name 'ports' -value $grpcConfig
 $consulJsonConfig.Acl | Add-Member -Type NoteProperty -Name 'tokens' -value $tokenConfig
-$consulJsonConfig.ca_file = $CONSUL_CONFIG_PATH + "\ca.pem"
+$consulJsonConfig.Tls.Defaults | Add-Member -Type NoteProperty -Name 'ca_file' -value $CA_PEM_FILE_PATH -Force
 $consulJsonConfig | ConvertTo-Json -Depth 6 | Set-Content consul.json
 
 $serviceJson = Get-Content .\service.json -Raw | ConvertFrom-Json
